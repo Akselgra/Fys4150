@@ -77,6 +77,41 @@
 
 \section{Theory}
 
+\subsection*{Vectorized second derivative}
+
+	If we have a 1d data-set on the form:
+	$$\vec{V(x)} = [v_0,\ v_1,\ \cdots,\ v_{n-1},\ v_{n},\ v_{n-1},\ \cdots] $$\\
+	Then we can write the second derivative of the data-set as:
+	$$f_n = -\frac{v_{n+1} + v_{n-1} - 2v_n}{\Delta x^2} $$\\
+	Where $\Delta x$ is the change in variable we are derivating based on; usually time.\\
+	\\
+	Rather than calculating the second derivatives of this data-set individually, we can instead calculate them all at the same time using linear algebra.\\
+	This can be done by finding a matrix $A$ such that
+	$$A\vec{V} = \vec{f} $$\\
+	Where:
+	\begin{gather*}
+	\vec{f} = \left[
+	\begin{array}{c}
+	2v_i - v_2\\
+	-v_1 + 2v_2 - v_3\\
+	\vdots\\
+	-v_{n-1} + 2v_n -v_{n+1}\\
+	-v_n + 2v_{n+1} - v_{n+2}\\
+	\vdots
+	\end{array}
+	\right]
+	\end{gather*}
+	As multiplying $\vec{f}$ with $\frac{1}{\Delta x^2}$ would give us an array containing all the second derivatives. We can see that $\textbf{A}$ must be:
+	\begin{gather*}
+	\textbf{A} = \left[
+	\begin{array}{ccccc}
+	2 & -1 & 0 & 0 & \cdots\\
+	-1 & 2 & -1 & 0 & \cdots\\
+	0 & -1 & 2 & -1 & \cdots\\
+	\vdots & 0 & -1 & 2 & -1
+	\end{array}
+	\right]
+	\end{gather*}
 \section{Method}
 
 \section{Results}
