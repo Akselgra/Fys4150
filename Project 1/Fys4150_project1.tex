@@ -1,0 +1,89 @@
+% REMEMBER TO SET LANGUAGE!
+\documentclass[a4paper,12pt,norsk]{article}
+\usepackage[utf8]{inputenc}
+% Standard stuff
+\usepackage{amsmath,amsthm, amssymb,graphicx,varioref,verbatim,amsfonts,geometry,esint,url}
+% colors in text
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+% Hyper refs
+\usepackage[colorlinks]{hyperref}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{multicol}
+
+\usepackage[export]{adjustbox}
+
+\usepackage{subfig}
+
+% Document formatting
+\setlength{\parindent}{0mm}
+\setlength{\parskip}{1.5mm}
+
+%Color scheme for listings
+\usepackage{textcomp}
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+
+\usepackage{listings}
+\lstset{
+	backgroundcolor=\color{lbcolor},
+	tabsize=4,
+	rulecolor=,
+	language=python,
+        basicstyle=\scriptsize,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+	numbers=left,
+        showstringspaces=false,
+        extendedchars=true,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,1},
+        commentstyle=\color[rgb]{0.133,0.545,0.133},
+        stringstyle=\color[rgb]{0.627,0.126,0.941}
+        }
+        
+\DeclareMathOperator{\dist}{dist}
+\newcommand{\distx}{\dist x}
+        
+\newcounter{subproject}
+\renewcommand{\thesubproject}{\alph{subproject}}
+\newenvironment{subproj}{
+\begin{description}
+\item[\refstepcounter{subproject}(\thesubproject)]
+}{\end{description}}
+
+%Lettering instead of numbering in different layers
+%\renewcommand{\labelenumi}{\alph{enumi}}
+%\renewcommand{\thesubsection}{\alph{subsection}}
+
+%opening
+
+\title{Fys4150 Project 1}
+\author{Aksel Graneng}
+
+\begin{document}
+\maketitle
+
+\abstract{enter abstract here}
+
+\section{Introduction}
+
+\section{Theory}
+
+\section{Method}
+
+\section{Results}
+
+\section{Discussion}
+
+\section{Conclusion}
+
+
+\end{document}
