@@ -77,7 +77,7 @@
 
 \section{Theory}
 
-\subsection*{Vectorized second derivative}
+\subsection{Vectorized second derivative}
 
 	If we have a 1d data-set on the form:
 	$$\vec{V(x)} = [v_0,\ v_1,\ \cdots,\ v_{n-1},\ v_{n},\ v_{n-1},\ \cdots] $$\\
@@ -112,10 +112,74 @@
 	\end{array}
 	\right]
 	\end{gather*}
+
+
+	
 \section{Method}
+	\subsection{General linear equation solver}
+	The first thing our program does is solve a set of general linear equations on the form $\textbf{A}\textbf{v} = \textbf{f}$. This is done by putting the matrix $\textbf{M}$ on row reduced echeleon form:
+	\begin{gather*}
+	\textbf{M} =  \left[
+	\begin{array}{cccccc}
+	b_1 & c_1 & 0 & 0 & \cdots f_1\\
+	a_2 & b_2 & c_2 & 0 & \cdots f_2\\
+	0 & a_3 & b_3 & b_3 & \cdots f_3\\
+	\vdots & 0 & a_4 & b_4 & \cdots f_4
+	\end{array}
+	\right]
+	\end{gather*}
 
+	Where $\textbf{M}$ is a $n \times (n+1)$ matrix. This is generally quite simple to solve using forward and backward substitution, but when $n$ becomes very large (in my experience, larger than $10^5$) we get problems with memory as well as computation time, as the most simple row reduction algorithm has $2(n+1)n^2$ FLOPS.\\
+	To avoid this problem, we use the fact that most of the elements in the matrix is zero. In fact, there are at most 4 elements in each row that isnt zero. By removing every element that is zero from the matrix (except one in for the first and last line), we get:
+
+\begin{gather*}
+	\textbf{M}^* = \left[
+	\begin{array}{cccc}
+	b_1 & c_1 & 0 & f_1\\
+	a_2 & b_2 & c_2 & f_2\\
+	\vdots & \vdots & \vdots & \vdots\\
+	0 & a_n & b_n & f_n
+	\end{array}
+	\right]
+	\end{gather*}
+
+	So now we have a $n \times 4$ matrix which contains all the information we need.\\
+	\\
+	We now use forward substitution on $\textbf{M}^*$ just like we would on $\textbf{M}$, except this time we "roll" the next row every time we subtract, so that $b_i$ is subtracted from $a_{i+1}$ and $c_i$ is subtracted from $b_{i+1}$. At the same time, we are careful to subtract $f_i$ from $f_{i+1}$. This means that index notation must be used, rather than numpy.roll.\\
+	This is done in a loop that has $n$ iterations. First it does 3 operations, one on each element in the row except for the first (which is zero), along with a division, to normalize it. Then it does 3 subtraction and multiplication operations on the next row.\\
+	\\
+	Next is backwards substitution. Again we use a loop with n iterations. Here we only do 2 subtractions and multiplications, on the last and second last element of each row.\\
+	All in all, this sums up to 14 FLOPS.\\
+	\\
+	After it was done, the general linear equation solver was tested on:
+	\begin{gather*}
+		u''(x) = f(x)\\
+		\\
+		f(x) = 100e^{-10x}
+	\end{gather*}
+	Which has a closed-form solution:
+	$$u(x) = 1 - (1 - e^{-10})x - e^{-10x} $$
+	
 \section{Results}
+	\subsection{General linear equation solver}
+	We tested the general linear equation solver for datapoints $n = 10,\ n= 100,\ n=1000$
+	\begin{figure}[H]
+		\includegraphics[scale = 0.7]{Figures/Figure_1.png}
+		\centering
+		\caption{The numerical solution vs the closed-form solution for 10 data-points. Here we can see that they deviate massively.}
+	\end{figure}
 
+	\begin{figure}[H]
+		\includegraphics[scale = 0.7]{Figures/Figure_2.png}
+		\centering
+		\caption{The numerical solution vs the closed-form solution for 100 data-points. Here we can see that the difference is decreasing.}
+	\end{figure}
+
+	\begin{figure}[H]
+		\includegraphics[scale = 0.7]{Figures/Figure_3.png}
+		\centering
+		\caption{The numerical solution vs the closed-form solution for 100 data-points. Here we can see that the difference has been even more decreased, and it is becoming hard to tell them apart.}
+	\end{figure}
 \section{Discussion}
 
 \section{Conclusion}
