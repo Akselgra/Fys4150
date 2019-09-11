@@ -71,9 +71,11 @@
 \begin{document}
 \maketitle
 
-\abstract{enter abstract here}
+\abstract{This paper looks at solving differential equations as sets of linear equations, and concludes with the importance of writing non-generalized code for matrix operations.}
 
 \section{Introduction}
+	In this project, we will be solving a differential equation as a set of linear equations. This will be done using algorithms of varying generalization in python.\\
+	We will look at just how row reduction can solve a differential equation, as well as the efficiency in different row reduction methods.
 
 \section{Theory}
 
@@ -113,7 +115,10 @@
 	\right]
 	\end{gather*}
 
-
+	This matrix can then be used to put up a set of linear equations:
+	$$\textbf{A}\textbf{v} = \textbf{f} $$\\
+	Where $\textbf{v}$ contains solutions to the differential equation:
+	$$-u''(x) = f(x) $$
 	
 \section{Method}
 	\subsection{General linear equation solver}
@@ -149,7 +154,7 @@
 	This is done in a loop that has $n$ iterations. First it does 3 operations, one on each element in the row except for the first (which is zero), along with a division, to normalize it. Then it does 3 subtraction and multiplication operations on the next row.\\
 	\\
 	Next is backwards substitution. Again we use a loop with n iterations. Here we only do 2 subtractions and multiplications, on the last and second last element of each row.\\
-	All in all, this sums up to 14 FLOPS.\\
+	All in all, this sums up to $14n$ FLOPS.\\
 	\\
 	After it was done, the general linear equation solver was tested on:
 	\begin{gather*}
@@ -160,7 +165,7 @@
 	Which has a closed-form solution:
 	$$u(x) = 1 - (1 - e^{-10})x - e^{-10x} $$
 
-\subsection{Specific linear equation solver}
+	\subsection{Specific linear equation solver}
 	The matrix we are working with in this project is very simple. All values of $a$, all values of $b$ and all values of $c$ are equal. That is to say: 
 	$$\text{for any }i \wedge j \in [1,\ n],\ a_i = a_j,\ b_i = b_j,\ c_i = c_j$$\\
 	This means that we are practically doing the same operations n times when we are row reducing our matrix. Rather than doing this, we can limit our algorithm to only operate on our values for $f$, as these are unknown. We simply need to look at what the row reduction algorithm does to the matrix to see what it does to $f$, and then skip right to that part when calculating it numerically.\\
@@ -174,12 +179,16 @@
 	The first value of $f$ (n = 1) ends up as:
 	$$f_1^* = \frac{1}{2}f_1 $$\\
 	\\
-	And then we look at forward substitution. We can see that we subtract:
+	And then we look at backwards substitution. We can see that we subtract:
 	$$\frac{n-i}{n-i-1}f^{**}_{-(i-1)} $$\\
 	from $f^*_{-i}$ to find our final value $f_{-i}^{**}$\\
 	The process of forward substitution ends with the last line being:
-	$$f^*_1 = f^*_1 + 2f_2^{**} $$
-	
+	$$f^*_1 = f^*_1 + 2f_2^{**} $$\\
+
+	The specified algorithm for solving the linear equations is a lot more efficient than the general one. Assuming we have already calculated the required numbers used in finding $f$, the forwards and backwards substitutions each require 2 operations, resulting in a total of $4n$ FLOPS.
+
+	\subsection{LU Decomposition, numpy.linalg.solve}
+	We should be comparing our results to what we get from using a built-in LU-decomposition method. This seems to require some work in python, so instead of using numpy.linalg.lu and doing calculations, we have opted to use numpy.linalg.solve, which fully solves the set of linear equations.
 	
 \section{Results}
 	\subsection{General linear equation solver}
@@ -201,9 +210,77 @@
 		\centering
 		\caption{The numerical solution vs the closed-form solution for 100 data-points. Here we can see that the difference has been even more decreased, and it is becoming hard to tell them apart.}
 	\end{figure}
+
+	\subsection{Computation time test}
+	The general linear equation solver method took $6.4$ seconds to compute $10^6$ data points.\\
+	The specific linear equation solver method took $1.0$ seconds to compute $10^6$ data points.
+
+	\subsection{Relative error}
+	Using the specific linear equation solver method for data points ranging from $10$ to $10^7$, we got these relative errors:
+	\begin{table}[H]
+		\begin{tabular}{|c|c|c|c|c|c|c|c|}
+		\hline
+		n & $10^{1}$ & $10^{2}$ & $10^{3}$ & $10^{4}$ & $10^5$ & $10^6$ & $10^7$\\
+		\hline
+		$\epsilon_\text{max}$ & $10^{-1}$ & $5.3 \cdot 10^{-3}$ & $4.9 \cdot 10^{-4}$ & $4.8 \cdot 10^{-5}$ & $4.8 \cdot 10^{-6}$ & $4.8 \cdot 10^{-7}$ & $4.8 \cdot 10{-8}$\\
+		\hline
+		\end{tabular}
+	\centering
+	\caption{The maximal relative error from the specific linear equation solver. $\epsilon$ is $\log_{10}(|\dfrac{v - u}{u}|)$ where $v$ is the calculated value and $u$ is the closed-form solution.}
+	\end{table}
+	
+	\subsection{Our method vs numpy.linalg.solve}
+	Solving the linear equation systems using numpy.linalg.solve and our method for different amounts of data points results in:
+	\begin{figure}[H]
+		\includegraphics[scale = 0.7]{Figures/Figure_4.png}
+		\centering
+		\caption{Numpy solution vs my solution. They already seem similair.}
+	\end{figure}
+	
+	\begin{figure}[H]
+		\includegraphics[scale = 0.7]{Figures/Figure_5.png}
+		\centering
+		\caption{Numpy solution vs my solution. It is becoming harder to tell them apart.}
+	\end{figure}
+
+	\begin{figure}[H]
+		\includegraphics[scale = 0.7]{Figures/Figure_6.png}
+		\centering
+		\caption{Numpy solution vs my solution. It is now impossible to tell them apart.}
+	\end{figure}
+	The elapsed time was:
+	\begin{table}[H]
+		\begin{tabular}{|c|c|c|}
+		\hline
+		Method & $n = 100$ & $n = 1000$\\
+		\hline
+		numpy & $0.001$ s & $0.015$ s\\
+		\hline
+		mine & $0.00097$ s & $0.010$ s\\
+		\hline
+		\end{tabular}
+	\centering
+	\caption{Computation time for the 2 methods.}
+	\end{table}
 \section{Discussion}
+	\subsection{Row reduction methods.}
+	The easiest, and least efficient, way to implement row reduction seems to be operating directly on a whole matrix using matrix notation. For this project, that was definitely not viable as we did not have enough memory for matrices larger than $10^4 \times 10^4$.\\
+	Removing all the zeros and operating on a $n \times 4$ matrix was also quite simple, and required a lot less computation time and memory. It is a shame work was not started on that immediately, as the memory problem was not realised until using $10^5 \times 10^5$ matrices was attempted and the first implementation took some time.\\
+	\\
+	Making the specified linear equation solver was by far the biggest task this project. The immediate reaction was to find a way to omit any calculations that did not directly apply to $\vec{f}$. The implementation of this eluded success for quite a while, however. This resulted in the implementation of the method "slow\_specific\_linear\_equation\_solver", which follows the same principle as the method "linear\_equation\_solver". Later, implementation of the original idea was attempted once again, and succeded.\\
+	The method "fast\_specific\_linear\_equation\_solver" seems to be around 5 times faster than the general one. This seems inconsistent with our calculation of FLOPS. This might be because we counted division to be 1 FLOP, while it is actually more costly than that.
+
+	\subsection{Relative Error}
+	From Table 1, it looks like solving the differential equation using row reduction is a first order method, causing the error to be reduced by a factor of 10 when the amount of data-points is increased by a factor of 10.
+
+	\subsection{LU decomposition}
+	We can see that the time elapsed inceases faster for the numpy method than for our method. This is no surprise, as the numpy method operates on the whole matrix. The numpy method assumedly has $\frac{2}{3}n^3$ FLOPS. It is impossible to use it on a matrix as large as $10^5 \times 10^5$ as our computer lacks the memory.
 
 \section{Conclusion}
+	From these experiments, we see the importance of making less generalized code when operating on very large matrices, as this can cut down on both memory usage and computation time. 
 
-
+\newpage
+\section{Appendix}
+	This is the code used in the project.
+\lstinputlisting{Code/Fys4150_project1.py}
 \end{document}
