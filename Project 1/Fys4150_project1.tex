@@ -159,6 +159,27 @@
 	\end{gather*}
 	Which has a closed-form solution:
 	$$u(x) = 1 - (1 - e^{-10})x - e^{-10x} $$
+
+\subsection{Specific linear equation solver}
+	The matrix we are working with in this project is very simple. All values of $a$, all values of $b$ and all values of $c$ are equal. That is to say: 
+	$$\text{for any }i \wedge j \in [1,\ n],\ a_i = a_j,\ b_i = b_j,\ c_i = c_j$$\\
+	This means that we are practically doing the same operations n times when we are row reducing our matrix. Rather than doing this, we can limit our algorithm to only operate on our values for $f$, as these are unknown. We simply need to look at what the row reduction algorithm does to the matrix to see what it does to $f$, and then skip right to that part when calculating it numerically.\\
+	\\
+	Studying the forward substitution, we see, starting with $n = 2$:
+	$$f_n^* = \frac{n}{n+1}(f_n - f_{n-1}^*) $$\\
+	Thus, the n'th row ends up as (excluding all the zeros):
+	$$[0,\ 1,\ -\frac{n}{n+1},\ f_n^*] $$\\
+	The very last row ends up as (with $n = \text{size of $f$}$):
+	$$[0,\ 0,\ 1,\ -(f_{-1}-f^*_{-2})\frac{n}{n+1}] $$\\
+	The first value of $f$ (n = 1) ends up as:
+	$$f_1^* = \frac{1}{2}f_1 $$\\
+	\\
+	And then we look at forward substitution. We can see that we subtract:
+	$$\frac{n-i}{n-i-1}f^{**}_{-(i-1)} $$\\
+	from $f^*_{-i}$ to find our final value $f_{-i}^{**}$\\
+	The process of forward substitution ends with the last line being:
+	$$f^*_1 = f^*_1 + 2f_2^{**} $$
+	
 	
 \section{Results}
 	\subsection{General linear equation solver}
